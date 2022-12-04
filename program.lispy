@@ -1,0 +1,28 @@
+-- Declare a number named x default-initialized to zero.
+(num x)
+
+-- Declare and initialize y to 5.
+(num y 5)
+-- You can use var with an initial value to infer the type.
+(var y 5) -- y is of type Number.
+
+(var radius 2)
+(var perimeter (* 2 math.pi radius))
+
+-- A 'for' loop
+(for ((num x 0)) (< x 5) (inc x)
+    (do
+        (println "x = " x)
+    )
+)
+
+-- The same loop written with a 'while'.
+(num x 0)
+(while (< x 5)
+    (do
+        (println "x = " x)
+        (inc x)
+    )
+)
+
+(make-list (* x x) (x))

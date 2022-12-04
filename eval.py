@@ -50,4 +50,15 @@ def eval_token_list(s):
     return result
 
 def operator_compute(op, values):
-    return 1
+    if op == "+":
+        res = 0
+        for x in values:
+            res += x
+        return res
+    elif op == "*":
+        res = 1
+        for x in values:
+            res *= x
+        return res
+    else:
+        raise Exception("In function operator_compute, operator " + op + " is unknown or not yet implemented.")

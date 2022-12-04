@@ -78,7 +78,7 @@ class TokenStream():
         else:
             raise Exception("Cannot call match when at eof.")
 
-    def match_one(self, tokens):
+    def match_one(self, *tokens):
         """
         match_one checks if the current token matches a token from the ones given as parameter and advances to the next token.
         

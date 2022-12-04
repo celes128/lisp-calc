@@ -39,8 +39,7 @@ class TestTokenStream(unittest.TestCase):
     def test_match_one1(self):
         ts = TokenStream([Token("+")])
 
-        candidates = [Token("-"), Token("+")]
-        matched = ts.match_one(candidates)
+        matched = ts.match_one(Token("-"), Token("+"))
 
         self.assertEqual(matched, Token("+"))
     
@@ -48,8 +47,7 @@ class TestTokenStream(unittest.TestCase):
     def test_match_one_failure1(self):
         ts = TokenStream([Token("+")])
 
-        candidates = [Token("-"), Token("*")]
-        self.assertRaises(Exception, ts.match_one, candidates)
+        self.assertRaises(Exception, ts.match_one, Token("-"), Token("*"))
 
 if __name__ == "__main__":
     unittest.main()

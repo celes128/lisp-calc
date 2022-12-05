@@ -109,5 +109,11 @@ class TestParseIdentifier(unittest.TestCase):
         self.assertEqual(ident, "my-name")
         self.assertEqual(i, 7)
 
+    def test_special_characters(self):
+        ident, i, err = lex.parse_identifier("_valid-code!?  ")
+
+        self.assertFalse(err)
+        self.assertEqual(ident, "_valid-code!?")
+
 if __name__ == '__main__':
     unittest.main()

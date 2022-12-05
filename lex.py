@@ -228,7 +228,7 @@ def parse_identifier(s, i = 0):
     """
     The syntax for valid identifiers is defined by the following rules:
         (1) the first character must either be a letter [a-zA-Z] or an underscore '_' and,
-        (2) the remaining characters can be letters, digits, underscores or minus signs '-'.
+        (2) the remaining characters can be letters, digits, or any characters - _ ! ?.
     """
 
     original_i = i
@@ -244,7 +244,7 @@ def parse_identifier(s, i = 0):
     # Succes! We keep parsing until the end of the identifier.
     begin = i
     i += 1
-    while i < len(s) and (s[i].isalpha() or s[i].isdigit() or s[i] in "_-"):
+    while i < len(s) and (s[i].isalpha() or s[i].isdigit() or s[i] in "-_!?"):
         i += 1
     
     return s[begin:i], i, None

@@ -1,6 +1,3 @@
-# File: lex.py
-# Description:  Lexical analysis functions and the Token.
-
 import error
 
 # Utils
@@ -67,18 +64,26 @@ class TokenStream():
         else:
             raise Exception("Cannot call next when at eof.")
 
-    def match(self, tok):
-        """match checks that the current token matches the one given as parameter and advances to the next token (by calling next)."""
+    def match(self, type):
+        """
+        match checks that the current token matches the one given as parameter and advances to the next token (by calling next).
+        
+        RETURN VALUE
+            Returns the actual token from the stream that matched.
+        """
 
         if not self.eof():
-            if tok == self.get():
+            # Get the current token
+            cur = self.get()
+            if type == cur.type:
                 self.next()
+                return cur
             else:
-                raise Exception("match failed: expected " + str(tok) + " but got " + str(self.get()) + ".")
+                raise Exception("match failed: expected " + type + " but got " + str(cur.type) + ".")
         else:
             raise Exception("Cannot call match when at eof.")
 
-    def match_one(self, *tokens):
+    def match_one(self, *types):
         """
         match_one checks if the current token matches a token from the ones given as parameter and advances to the next token.
         
@@ -92,13 +97,13 @@ class TokenStream():
         if not self.eof():
             cur = self.get()
 
-            for tok in tokens:
-                if tok == cur:
+            for type in types:
+                if type == cur.type:
                     self.next()
                     return cur
             
             # Error: none matched.
-            raise Exception("match_one failed: expected one of " + to_str(tokens) + " but got " + str(self.get()) + ".")
+            raise Exception("match_one failed: expected one of " + to_str(types) + " but got " + str(cur) + ".")
         else:
             raise Exception("Cannot call match when at eof.")
 
@@ -228,7 +233,7 @@ def parse_identifier(s, i = 0):
     """
     The syntax for valid identifiers is defined by the following rules:
         (1) the first character must either be a letter [a-zA-Z] or an underscore '_' and,
-        (2) the remaining characters can be letters, digits, or any characters - _ ! ?.
+        (2) the remaining characters can be letters, digits, or any characters - * _ ! ?.
     """
 
     original_i = i
@@ -236,15 +241,15 @@ def parse_identifier(s, i = 0):
     if i >= len(s):
         return "", original_i, error.new("Start index is out of the string bounds.")
 
-    c = s[i]
-    valid_start = c.isalpha() or c == '_'
+    # Check that the first character can start an identifier.
+    valid_start = s[i].isalpha() or s[i] == '_'
     if not valid_start:
         return "", original_i, error.new("Does not match the syntax of an identifier.")
 
     # Succes! We keep parsing until the end of the identifier.
     begin = i
     i += 1
-    while i < len(s) and (s[i].isalpha() or s[i].isdigit() or s[i] in "-_!?"):
+    while i < len(s) and (s[i].isalpha() or s[i].isdigit() or s[i] in "-*_!?"):
         i += 1
     
     return s[begin:i], i, None

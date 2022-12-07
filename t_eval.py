@@ -145,5 +145,98 @@ class TestEvalSetq(unittest.TestCase):
         self.assertEqual(result, 5)
         self.assertTrue(env.contains("x", 5))
 
+class TestSkipAtom(unittest.TestCase):
+
+    def test_identifier(self):
+        tokens = [
+            Token("("),
+            Token("id", "x"),
+            Token("num", 5),
+            Token(")"),
+            ]
+        s = TokenStream(tokens)
+        # Point to x
+        s.next()
+
+        atom = eval.skip_atom(s)        
+        self.assertEqual(atom, Token("id", "x"))
+        self.assertEqual(s.get(), Token("num", 5))
+
+    def test_number(self):
+        tokens = [
+            Token("("),
+            Token("id", "x"),
+            Token("num", 5),
+            Token(")"),
+            ]
+        s = TokenStream(tokens)
+        # Point to 5
+        s.next()
+        s.next()
+
+        atom = eval.skip_atom(s)        
+        self.assertEqual(atom, Token("num", 5))
+        self.assertEqual(s.get(), Token(")"))
+
+    def test_not_atom(self):
+        tokens = [
+            Token("("),
+            Token("id", "x"),
+            Token(")"),
+            ]
+        s = TokenStream(tokens)
+
+        self.assertRaises(Exception, eval.skip_atom, s)
+
+class TestSkipList(unittest.TestCase):
+
+    def test_one_empty_list(self):
+        tokens = [
+            Token("("),
+            Token(")"),
+            ]
+        s = TokenStream(tokens)
+
+        eval.skip_list(s)
+
+        self.assertTrue(s.eof())
+
+    def test_one_list_with_one_identifier(self):
+        tokens = [
+            Token("("),
+            Token("id", "foo"),
+            Token(")"),
+            ]
+        s = TokenStream(tokens)
+
+        eval.skip_list(s)
+
+        self.assertTrue(s.eof())
+
+    def test_one_list_with_one_number(self):
+        tokens = [
+            Token("("),
+            Token("num", 5),
+            Token(")"),
+            ]
+        s = TokenStream(tokens)
+
+        eval.skip_list(s)
+
+        self.assertTrue(s.eof())
+    
+    def test_two_nested_list(self):
+        tokens = [
+            Token("("),
+            Token("("),
+            Token(")"),
+            Token(")"),
+            ]
+        s = TokenStream(tokens)
+
+        eval.skip_list(s)
+
+        self.assertTrue(s.eof())
+
 if __name__ == "__main__":
     unittest.main()

@@ -131,6 +131,34 @@ def parse_expr(s: TokenStream, env: Environment, evaluate: bool):
 def eval_expr(s: TokenStream, env: Environment):
     return parse_expr(s, env, evaluate=True)
 
+# An atom is either a number or an identifier.
+def skip_atom(s: TokenStream):
+    tok = s.get()
+    if tok.type in ["num", "id"]:
+        s.next()
+        return tok
+    else:
+        raise Exception("Error in skip_atom: expected an atom but got " + str(tok.type))
+
+def skip_list(s: TokenStream):
+    if s.get().type != '(':
+        raise Exception("Error in skip_list: expecting ( but got " + str(s.get()) + ".")
+
+    # Advance in the stream until we find the matching closing parenthesis
+    # Counter for the current number of open parenthesis not matched
+    n = 1
+    s.next()
+    while n > 0:
+        if s.eof():
+            raise Exception("Error in skip_list: unbalanced parenthesis found.")
+        
+        if s.get().type == ')':
+            n -= 1
+        elif s.get().type == '(':
+            n += 1
+        
+        s.next()
+    
 def skip_expr(s: TokenStream, env: Environment):
     parse_expr(s, env, evaluate=False)
 

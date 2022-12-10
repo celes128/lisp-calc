@@ -159,8 +159,14 @@ def skip_list(s: TokenStream):
         
         s.next()
     
-def skip_expr(s: TokenStream, env: Environment):
-    parse_expr(s, env, evaluate=False)
+def skip_expr(s: TokenStream):
+    tok = s.get()
+    if tok.type in ["num", "id"]:
+        return skip_atom(s)
+    elif tok.type == "(":
+        return skip_list(s)
+    else:
+        raise Exception("Error in skip_expr: expecting atom or list but got " + str(tok))
 
 # Grammar rule
 # IF  ::=  '('  'if'  expr0  expr1  expr2?  ')'
@@ -186,9 +192,9 @@ def eval_if(s: TokenStream, env: Environment):
 
         # Check if there is the optional expression expr2 for the 'else' part of the if expression
         if s.get().type != ")":
-            skip_expr(s, env) # parse expr2 without evaluating it
+            skip_expr(s) # parse expr2 without evaluating it
     else:
-        skip_expr(s, env) # skip expr1
+        skip_expr(s) # skip expr1
         
         # Check if there is the optional expression expr2 for the 'else' part of the if expression
         if s.get().type != ")":

@@ -116,7 +116,6 @@ class TestEvalIf(unittest.TestCase):
 
     def test_if_false_with_an_else_clause(self):
         env = Environment()
-        
         tokens = [
             Token("("),
             Token("if"),
@@ -129,6 +128,38 @@ class TestEvalIf(unittest.TestCase):
 
         self.assertEqual(result, 2)
 
+    def test_eval_complex_if_1(self):
+        env = Environment()
+        # (if 1 (setq x 5) (setq x 10))
+        tokens = [
+            Token("("),
+            Token("if"),
+
+            Token("num", 1),
+
+            Token("("),
+            Token("setq"),
+            Token("id", "x"),
+            Token("x", 5),
+            Token(")"),
+            
+            Token("("),
+            Token("setq"),
+            Token("id", "x"),
+            Token("x", 10),
+            Token(")"),
+
+            Token(")"),
+            ]
+        
+        s = TokenStream(tokens)
+        
+        result = eval.eval_if(s, env)
+        
+        self.assertTrue(s.eof())
+        self.assertTrue(env.contains("x", 5))
+        self.assertEqual(result, 5)
+        
 class TestEvalSetq(unittest.TestCase):
 
     def test_1(self):

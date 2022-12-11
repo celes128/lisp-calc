@@ -1,0 +1,33 @@
+# if statements
+formal syntax:
+IF      ::=     'if' EXPR BLOCK ELIF* ELSE?
+ELIF    ::=     'elif' EXPR BLOCK
+ELSE    ::=     'else' BLOCK
+
+Case #1 - if EXPR BLOCK
+low-level code
+        eval EXPR
+        brfalse end  ; 'branch if false' => if top of stack is false branch to label 'end'
+        <instructions for BLOCK>
+    end:
+        ...
+
+    Example:
+        if x {
+            f(x)
+        }
+
+    Assuming x is a local variable, the associated low-level code is:
+        0 load x
+        1 brfalse 4
+        2 load x
+        3 call f
+        4 ...
+
+Remarks:
+    * The instruction 'brfalse' looks at the top of the stack and interpret it as a boolean value.
+      It pops this value and sets the instruction pointer accordingly.
+      So here is an implementation in python:
+
+        def _ins_brfalse(self, args):
+            

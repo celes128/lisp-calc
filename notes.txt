@@ -7,7 +7,7 @@ ELSE    ::=     'else' BLOCK
 Case #1 - if EXPR BLOCK
 low-level code
         eval EXPR
-        brfalse end  ; 'branch if false' => if top of stack is false branch to label 'end'
+        brfalse end  ; 'branch if false' => if top of stack is false branch to the label 'end'
         <instructions for BLOCK>
     end:
         ...
@@ -30,4 +30,46 @@ Remarks:
       So here is an implementation in python:
 
         def _ins_brfalse(self, args):
-            
+            # args[0] is the address to jump to if the TOS evaluates to false.
+            if self._operands.pop() == False:
+                self._ip = args[0]
+            else:
+                self._ip += 1
+
+# while statements
+formal syntax:
+WHILE   ::=     'while' EXPR BLOCK
+
+low-level code
+        loop:
+            eval EXPR
+            brfalse end
+            <instructions for BLOCK>
+            br loop         ; 'branch (always)' to the label 'loop'
+
+    Example:
+        while x {
+            x--
+        }
+
+        Again, assuming x is a local variable, the associated low-level code is:
+            0 load x
+            1 brfalse 6
+            2 load x
+            3 dec
+            4 store x
+            5 br 0
+            6 ...
+
+        Python implementation of the branch (always) instruction 'br':
+
+            def _ins_br(self, args):
+                self._ip = args[0]
+
+
+# Range Iterator Objects
+I would like to implement range like in python.
+
+    for i in range(10) {
+        # ... do stuff
+    }

@@ -1,6 +1,17 @@
 from stack import Stack
 import objects
+from func_desc import FunctionDescriptor
 
+class StackFrame():
+
+    def __init__(self, fd: FunctionDescriptor, ret_addr: int, locals: list):
+        # Function descriptor
+        self.fd = fd
+        # Return address
+        self.ret_addr = ret_addr
+        # Local variables (function arguments at the front followed by the "real" local variables)
+        self.locals = locals
+        
 class Interpreter():
 
     HALT = 0
@@ -25,35 +36,75 @@ class Interpreter():
             "gstore":self._ins_gstore,
             "gload":self._ins_gload,
             "add":self._ins_add,
+            "call":self._ins_call,
+            "ret":self._ins_ret,
+            "load":self._ins_load,
         }
         self._halt = False
         self.output = ""
+
+    def _ins_call(self, args):
+        # Compute the arguments for constructing a StackFrame object.
+
+        # Get the function description
+        fd = self._cstpool.get(args[0])
+        if type(fd) != FunctionDescriptor:
+            raise Exception("Instruction call: constant #" + str(args[0]) + " is not a function.")
+
+        # Collect (and remove) the function arguments from the operand stack
+        fargs = []
+        for i in range(fd.nargs):
+            fargs.append(self._operands.pop())
+
+        # Return address
+        ret_addr = self._ip + 1
+
+        # Create and push the stack frame
+        self._calls.push(StackFrame(fd, ret_addr, fargs))
+
+        # Point to the first instruction of the function
+        self._ip = fd.address
+
+    def _ins_ret(self, args):
+        frame = self._calls.pop()
+        self._ip = frame.ret_addr
+
+    def _ins_load(self, args):
+        """
+        Instruction: load
+        Description: push the local variable from the current stack frame onto the operand stack.
+        """
+        # Get the local variable's value from the stack frame
+        value = self._calls.top().locals[args[0]]
+        # Push its value onto the operand stack
+        self._operands.push(value)
+        # Point to the next instruction
+        self._ip += 1
 
     def _ins_gload(self, args):
         var = self._globals[args[0]]
         value = var[1]
         self._operands.push(value)
-        # if type(value) == objects.Number:
-        #     self._operands.push(value.value)
-        # elif type(value) == objects.String:
-        #     self._operands.push(value.s)
-        # else:
-        #     raise Exception("Error in gload instruction: unknown object type.")
+        self._ip += 1
 
     def _ins_gstore(self, args):
         value = self._operands.pop()
         self._globals[args[0]][1] = value
+        self._ip += 1
         
     def _ins_halt(self, args):
         self._halt = True
+        self._ip += 1
     
     def _ins_sconst(self, args):
         operand = self._cstpool.get(args[0])
         self._operands.push(operand)
+        self._ip += 1
     
     def _ins_nconst(self, args):
         x = args[0]
         self._operands.push(objects.Number(x))
+        self._ip += 1
 
     def _ins_add(self, args):
         right = self._operands.pop()
@@ -62,6 +113,7 @@ class Interpreter():
             raise Exception("add instruction error: one or both operand is not a number.")
         result = left.value + right.value
         self._operands.push(objects.Number(result))
+        self._ip += 1
         
     def _ins_print(self, args):
         # Number of the actual argument strings to print
@@ -73,6 +125,7 @@ class Interpreter():
             strs.append(str(s))
         # Print in the output
         self.output += " ".join(strs) + "\n"
+        self._ip += 1
         
     def run(self):
         self._halt = False
@@ -83,5 +136,3 @@ class Interpreter():
             args = ins[1:]
             # Execute the instruction
             self._instructions[ins[0]](args)
-            # Point to the next instruction
-            self._ip += 1

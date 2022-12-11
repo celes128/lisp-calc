@@ -1,4 +1,4 @@
-class FunctioNDescriptor():
+class FunctionDescriptor():
 
     def __init__(self, name, nargs, nlocals, address):
         self.name = name
